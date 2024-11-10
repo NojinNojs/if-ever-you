@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>if ever you're</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #826849;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lrc {
+            width: 100%;
+            height: 100vh;
+            overflow-y: auto;
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lrc p {
+            position: absolute;
+            width: 100%;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+            text-align: center;
+            padding-bottom: 20px;
+            color: rgba(255, 255, 255, .25);
+            transition: color 0.5s, top 0.6s, transform 0.5s;
+            font-weight: 700;
+            transform-origin: center center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="lrc">
+
+    </div>
+
+</body>
+<script>
+    class LyricSync {
+        constructor(lrcContainerSelector, audioSrc, lyricsText, style = {
+            fontSize: 40,
+            ifBlur: true,
+            ifTrainsion: true,
+            scale: 1.2,
+            interval: 10,
+            ifInner: false,
+            animateionOffsetTime: 5
+        }) {
+            this.lrcContainer = document.querySelector(lrcContainerSelector);
+            this.audio = new Audio(audioSrc);
+            this.lyricsText = lyricsText;
+            this.lrcList = [];
+            this.offsetH = 90;
+            this.lastLrc = -1;
+            this.style = style;
+            this.init();
+        }
+
+        init() {
+            this.lrcList = this.parseLrc(this.lyricsText);
+            for (let i = 0; i < this.lrcList.length; i++) {
+                this.lrcContainer.appendChild(this.lrcList[i].dom);
+            }
+            this.nextLrc(0, this.lrcList, true);
+
+            this.audio.addEventListener('timeupdate', () => this.updateLrc());
+            document.body.addEventListener('click', () => {
+                if (this.audio.paused) {
+                    this.audio.play();
+                } else {
+                    this.audio.pause();
+                }
+            });
+        }
+
+        parseLrc(text) {
+            let arr = text.split('\n');
+            let res = [];
+            for (let i = 0; i < arr.length; i++) {
+                arr[i] = arr[i].substring(1);
+                let arrTL = arr[i].split(']');
+                let arrTime = arrTL[0].split(':');
+                let doTime = arrTime[1].split('.');
+                const p = document.createElement('p');
+                p.innerText = arrTL[1];
+                p.style.fontSize = this.style.fontSize + 'px';
+                p.style.paddingBottom = this.style.interval + 'px';
+                res.push({
+                    time: (Number(arrTime[0]) * 60 * 1000) + (Number(doTime[0]) * 1000) + Number(doTime[1]),
+                    lrc: arrTL[1],
+                    index: i,
+                    dom: p
+                });
+            }
+            return res;
+        }
+
+        nextLrc(i = 0, data, isinit = false) {
+            if (isinit) {
+                for (let j = 0; j < data.length; j++) {
+                    data[j].dom.style.top = this.getTopHeight(i, j, data) + 'px';
+                }
+                return;
+            }
+            for (let j = 0; j < data.length; j++) {
+                if (this.style.ifBlur) {
+                    data[j].dom.style.filter = `blur(${Math.abs(j - i)}px)`
+                }
+                data[j].dom.style.color = (i === j) ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, .25)';
+                data[j].dom.style.transform = (i === j) ? 'scale(' + this.style.scale + ')' : 'scale(1)';
+                const n = Math.abs(j - i)
+                const ah = n * 70 - n * this.style.animateionOffsetTime
+                if (i < j && this.style.ifTrainsion) {
+                    if (this.style.ifInner) {
+                        if (this.isElementVisible(data[j].dom)) {
+                            setTimeout(() => {
+                                window.requestAnimationFrame(() => {
+                                    data[j].dom.style.top = this.getTopHeight(i, j, data) + 'px';
+                                });
+                            }, ah);
+                        } else {
+                            data[j].dom.style.top = this.getTopHeight(i, j, data) + 'px';
+                        }
+                    } else {
+                        setTimeout(() => {
+                            window.requestAnimationFrame(() => {
+                                data[j].dom.style.top = this.getTopHeight(i, j, data) + 'px';
+                            });
+                        }, ah);
+                    }
+                } else {
+                    data[j].dom.style.top = this.getTopHeight(i, j, data) + 'px';
+                }
+            }
+        }
+
+        getTopHeight(now, to, data) {
+            let res = 0;
+            for (let i = now; i < to; i++) {
+                res += data[i].dom.offsetHeight;
+            }
+            for (let i = now; i > to; i--) {
+                res -= data[i].dom.offsetHeight;
+            }
+            return res + this.offsetH;
+        }
+
+        updateLrc() {
+            const cTime = this.audio.currentTime * 1000;
+            let lList = [];
+            for (let i = 0; i < this.lrcList.length; i++) {
+                if (cTime >= this.lrcList[i].time) {
+                    lList.push(this.lrcList[i]);
+                }
+            }
+            if (lList.length === 0) return;
+            if (this.lastLrc !== lList[lList.length - 1].index) {
+                this.nextLrc(lList[lList.length - 1].index, this.lrcList);
+                this.lastLrc = lList[lList.length - 1].index;
+            }
+        }
+
+        isElementVisible(el) {
+            const rect = el.getBoundingClientRect()
+            const vWidth = window.innerWidth || document.documentElement.clientWidth
+            const vHeight = window.innerHeight || document.documentElement.clientHeight
+
+            if (
+                rect.right < 0 ||
+                rect.bottom < 0 ||
+                rect.left > vWidth ||
+                rect.top > vHeight
+            ) {
+                return false
+            }
+            return true
+        }
+    }
+
+    const lyricsText = `[00:01.80]The best of romances
+[00:03.95]Deserve second chances
+[00:06.90]I'll get to you somehow
+[00:08.95]Cause I promise now
+[00:11.90]If ever you're in my arms again
+[00:16.50]This time I'll love you much better
+[00:21.30]If ever you're in my arms again
+[00:26.30]This time I'll hold you forever
+[00:31.01]This time we'll never end
+[00:34.90]If ever you're in my arms again
+[00:39.90]This time I'll love you much better
+[00:44.90]If ever you're in my arms again
+[00:49.90]This time I'll hold you forever
+[00:53.98]This time we'll never end`;
+
+    const lyricSync = new LyricSync('.lrc', './if-ever-you.mp3', lyricsText, {
+        ifTrainsion: true,
+        ifBlur: true,
+        scale: 1.1,
+        fontSize: 40,
+        interval: 30,
+        ifInner: false,
+        animateionOffsetTime: 50
+    });
+</script>
+
+</html>
