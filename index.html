@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>if ever you're</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <div class="player-container">
+      <div class="music-info">
+        <div class="album-art">
+          <!-- SVG Vinyl Record -->
+          <svg viewBox="0 0 800 800" class="vinyl">
+            <circle cx="400" cy="400" r="390" fill="#000" />
+            <circle cx="400" cy="400" r="380" fill="#1a1a1a" />
+            <circle cx="400" cy="400" r="280" fill="#000" />
+            <circle cx="400" cy="400" r="270" fill="#1a1a1a" />
+            <circle cx="400" cy="400" r="170" fill="#000" />
+            <circle cx="400" cy="400" r="160" fill="#1a1a1a" />
+            <circle cx="400" cy="400" r="60" fill="#000" />
+            <circle cx="400" cy="400" r="50" fill="#1a1a1a" />
+            <circle cx="400" cy="400" r="20" fill="#000" />
+            <!-- Grooves -->
+            <path d="M400 20A380 380 0 0 1 780 400" stroke="#222" fill="none" />
+            <path
+              d="M400 120A280 280 0 0 1 680 400"
+              stroke="#222"
+              fill="none"
+            />
+            <path
+              d="M400 220A180 180 0 0 1 580 400"
+              stroke="#222"
+              fill="none"
+            />
+          </svg>
+        </div>
+        <div class="track-info">
+          <h2>If Ever You're In My Arms Again</h2>
+          <p>Peabo Bryson</p>
+        </div>
+        <div class="sound-waves">
+          <div class="wave"></div>
+          <div class="wave"></div>
+          <div class="wave"></div>
+          <div class="wave"></div>
+        </div>
+      </div>
+
+      <div class="lrc"></div>
+
+      <div class="controls">
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress"></div>
+          </div>
+          <div class="time">
+            <span class="current-time">0:00</span>
+            <span class="duration">0:00</span>
+          </div>
+        </div>
+        <div class="buttons">
+          <button class="btn shuffle" data-tooltip="Shuffle">
+            <i class="fas fa-random"></i>
+          </button>
+          <button class="btn prev" data-tooltip="Previous">
+            <i class="fas fa-step-backward"></i>
+          </button>
+          <button class="btn play-pause" data-tooltip="Play/Pause">
+            <i class="fas fa-play"></i>
+          </button>
+          <button class="btn next" data-tooltip="Next">
+            <i class="fas fa-step-forward"></i>
+          </button>
+          <button class="btn repeat" data-tooltip="Repeat">
+            <i class="fas fa-redo"></i>
+          </button>
+        </div>
+        <div class="volume-container">
+          <i class="fas fa-volume-up" data-tooltip="Volume"></i>
+          <div class="volume-slider" data-tooltip="Adjust volume">
+            <div class="volume-progress"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
